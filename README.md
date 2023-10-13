@@ -36,7 +36,7 @@ This project aims to simplify the process of setting up a basic Azure infrastruc
 
 1. **Resource Group:** :package:
 
-   Is a logical container that helps manage and organize Azure resources. It provides a way to control access and ensure resources are deployed in a common location.
+ Is a logical container that helps manage and organize Azure resources. It provides a way to control access and ensure resources are deployed in a common location.
 
 In this case, we define a resource type named "azurerm_resource_group" which is aliased as "rg." Within this resource, we specify the desired configuration.
     
