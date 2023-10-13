@@ -1,6 +1,6 @@
 
 
-## Azure Infrastructure Deployment with Terraform :rocket
+## Azure Infrastructure Deployment with Terraform :rocket:
 
 Welcome to the Azure Infrastructure Deployment project! This repository contains code to automate the deployment of infrastructure resources in Microsoft Azure using Terraform.
 
