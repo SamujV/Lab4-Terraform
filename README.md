@@ -29,6 +29,8 @@ This project aims to simplify the process of setting up a basic Azure infrastruc
 2. **terraform validate:** Checks the configuration files for syntax errors and potential issues without making any actual changes.
 3. **terraform plan:** Generates an execution plan that outlines what actions Terraform will take to create or modify resources based on your configuration.
 4. **terraform apply:** Applies the changes defined in your configuration to create, update, or delete resources in your infrastructure as specified in the execution plan.
+5. **terraform destroy:**
+It is used to terminate and remove all resources defined in the configuration, effectively destroying the infrastructure that was previously created.
 ### Key Components
 
 
@@ -162,7 +164,29 @@ resource "azurerm_linux_virtual_machine" "linuxmach" {
 
 
 ### Evidence
+#### terraform init
+![](./images/finalinit.png)
+#### terraform validate
+![](./images/finalvalidate.png)
 
+#### terraform plan
+![](./images/finalplan.png)
+
+#### terraform apply
+![](./images/finalapply.png)
 ![](./images/ipPublica.png)
+After we execute ```terraform apply``` we are going to see an ip public that is the result of the definition we made in the file outputs.tf
+
+#### Portal Azure 
+We are able to see the virtual machine running on our azure account
+![](./images/finalazure.png)
+
+#### SSH 
+when we get our ip public we can introduce ```ssh adminuser@ippublic ``` in a console so we can access our VM in this case we got the public ip: ```172.173.219.167``` 
 ![](./images/ssh1.png)
 ![](./images/ssh2.png)
+we are able to enter the linux machine after entering the password.
+
+#### terraform destroy
+Finally if we want we can destory what we have built
+![](./images/finaldestroy.png)
