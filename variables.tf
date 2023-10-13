@@ -12,7 +12,7 @@ variable subnet {
   type        = string
   description = "subnet"
 }
-variable interface {
+variable inter {
   type        = string
   description = "interface"
 }
