@@ -1,197 +1,68 @@
+## Azure Infrastructure Deployment with Terraform modules :computer:
 
-
-## Azure Infrastructure Deployment with Terraform :rocket:
-
-Welcome to the Azure Infrastructure Deployment project! This repository contains code to automate the deployment of infrastructure resources in Microsoft Azure using Terraform.
-
-### Overview :telescope:
-
-This project aims to simplify the process of setting up a basic Azure infrastructure, complete with a virtual network, subnets, network security rules, and a Linux virtual machine. By leveraging Terraform, you can easily define and provision your Azure resources as code, making infrastructure management more efficient and consistent.
+The purpose of using Terraform modules is to improve the reusability, maintainability, and organization of your Terraform code. :gear:
 
 ### Files :file_folder:
 
+In Terraform, when you're using modules, you typically have a specific directory structure and a set of files for your modules. You might also have similar files at the root level for your main configuration. :open_file_folder:
+
+### modules/vm :computer:
+
 - **main.tf**
 
-  In this file, you specify the resources, their configurations, and how they are related to each other. It serves as the blueprint for your infrastructure. 
+  Defines the actual infrastructure resources and configurations specific to the VM module. It contains the resource blocks and other settings necessary to create and configure VM instances. This file defines the core functionality of the module. :building_construction:
 - **variables.tf**
 
-  This file is used to define input variables for your Terraform project.
-- **terraform.tfvars**
-
-  Is a file where you assign values to the variables defined in variables.tf. It's a convenient way to provide specific values for your variables without modifying the main configuration code in main.tf.
+  Defines the input variables that the VM module expects. These variables are placeholders for values that will be provided when the module is used. It essentially documents the expected inputs for the module. :pencil:
 - **output.tf**
 
-  This file is used to define the output values that you want to display or make available to users after a Terraform run. For this case, we are going to use it to show the public IP of the VM.
+  Defines the output values produced by the VM module. These output values are intended for use in other parts of your Terraform configuration, including in the root module. These outputs allow you to access information or attributes of the resources created by the module. :outbox_tray:
 
-### Command execution :hammer_and_wrench:
+### root :earth_americas:
 
-1. **terraform init:** Initialize a working directory by downloading provider plugins and modules.
+- **main.tf**
 
-2. **terraform validate:** Checks the configuration files for syntax errors and potential issues without making any actual changes.
-3. **terraform plan:** Generates an execution plan that outlines what actions Terraform will take to create or modify resources based on your configuration.
-4. **terraform apply:** Applies the changes defined in your configuration to create, update, or delete resources in your infrastructure as specified in the execution plan.
-5. **terraform destroy:** It is used to terminate and remove all resources defined in the configuration, effectively destroying the infrastructure that was previously created.
+  Defines the top-level configuration for your infrastructure. It may include the instantiation of the module, specifying the inputs required by the module, and possibly any additional configuration that applies to the entire infrastructure. This file ties together the different modules and resources you're using in your Terraform configuration. :world_map:
+- **variables.tf**
+
+  It is used to define variables that are used in the top-level configuration. These variables might be used to pass values to the module, configure the overall infrastructure, or store any values you want to parameterize at the top level. :wrench:
+- **output.tf**
+
+  Defines outputs that are specific to the entire Terraform configuration. These outputs might capture information from various modules or provide a summary of the infrastructure. You can also reference outputs from modules in this file. :mag:
 
 ### Key Components :key:
 
-1. **Resource Group:** :package:
+1. **VM instance :computer:** 
 
- Is a logical container that helps manage and organize Azure resources. It provides a way to control access and ensure resources are deployed in a common location.
-
-In this case, we define a resource type named "azurerm_resource_group" which is aliased as "rg." Within this resource, we specify the desired configuration.
-    
+We instantiate the module based on the resources we define in the module main.tf :building_construction:
+ 
 ```
-resource "azurerm_resource_group" "rg" {  
-  name     = var.virtualmachine
-  location = var.location
+module "vm" {
+source = "./modules/vm"
+ip_name = var.ip_name
+resource_group_name = azurerm_resource_group.rg.name
+location = azurerm_resource_group.rg.location
+inter = var.inter
+resource_group_location = azurerm_resource_group.rg.location
+subnet_id = azurerm_subnet.subnet.id
+securitygrp = var.securitygrp
+securityrule = var.securityrule
+unique_id = var.unique_id
 }
 ```
 
-2. **Virtual Network:** :electric_plug:
+### Evidence :bookmark_tabs:
 
- Virtual Network is an isolated network that allows resources to communicate securely. It acts as a private network where you can define address spaces, subnets, and network security rules.
-```
-resource "azurerm_virtual_network" "vn" {
-  name                = var.virtualnetwork
-  address_space       = ["10.0.0.0/16"]
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-}
-```
+#### terraform apply :rocket:
+After apply, we are going to get the two IP addresses, then we can connect via SSH. :white_check_mark:
+![](./images/ips_module.png) :camera_flash:
 
-3. **Subnet:** :triangular_flag_on_post:
+#### SSH machine 1 :computer:
+![](./images/module-machine1.png) :desktop_computer:
 
-Subnets are subdivisions of the virtual network. They provide a way to further segment the network into smaller, manageable segments. Subnets can be used to group related resources or apply different network configurations.
-```
-resource "azurerm_subnet" "subnet" {
-  name                 = var.subnet
-  resource_group_name  = azurerm_resource_group.rg.name
-  virtual_network_name = azurerm_virtual_network.vn.name
-  address_prefixes     = ["10.0.2.0/24"]
-}
-```
+#### SSH machine 2 :computer:
+![](./images/module-machine2.png) 
 
-4. **Network Interface:** :computer:
+#### Azure portal :cloud:
 
-Connects virtual machines and other Azure resources to a network. It serves as the network interface card (NIC) for virtual machines and plays a critical role in enabling network communication.
-```
-resource "azurerm_network_interface" "interface" {
-  name                = var.inter
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-
-  ip_configuration {
-    name                          = "internal"
-    subnet_id                     = azurerm_subnet.subnet.id
-    private_ip_address_allocation = "Dynamic"
-    public_ip_address_id = azurerm_public_ip.ip.id
-  }
-}
-```
-
-5. **Public IP:** :globe_with_meridians:
-
-Enables resources in Azure to communicate with the external world, such as the internet. It is used to make resources, like virtual machines, accessible from the internet.
-```
-resource "azurerm_public_ip" "ip" {
-  name                = var.ip_name
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_resource_group.rg.location
-  allocation_method   = "Static"
-}
-```
-
-6. **Network Security Group:** :shield:
-
-Is a fundamental element for network security within Azure. It allows or denies inbound and outbound network traffic to resources by defining security rules based on factors like source/destination IP, port, and protocol.
-```
-resource "azurerm_network_security_group" "sg" {
-  name                = var.securitygrp
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-
-  security_rule {
-    name                       = var.securityrule
-    priority                   = 1001
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "22"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-}
-```
-
-7. **Network Interface Security Group:** :lock_with_ink_pen:
-
-Is responsible for associating a Network Security Group with a specific network interface, allowing you to apply security rules at the network interface level, providing granular control over inbound and outbound network traffic for individual network interfaces. 
-```
-resource "azurerm_network_interface_security_group_association" "isgp" {
-  network_interface_id      = azurerm_network_interface.interface.id
-  network_security_group_id = azurerm_network_security_group.sg.id
-}
-
-```
-
-8. **Linux Virtual Machine:** :computer:
-
-The Linux virtual machine is a cloud-based Linux-based computer that can be customized and deployed. In this case, we define the software version, machine name, user, and password among others.
-```
-resource "azurerm_linux_virtual_machine" "linuxmach" {
-  name                = var.linuxm
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_resource_group.rg.location
-  size                = "Standard_F2"
-  admin_username      = "adminuser"
-  admin_password      = "P@$$w0rd1234!"
-  disable_password_authentication = false
-  network_interface_ids = [
-    azurerm_network_interface.interface.id,
-  ]
-
-  os_disk {
-    caching              = "ReadWrite"
-    storage_account_type = "Standard_LRS"
-  }
-
-  source_image_reference {
-    publisher = "Canonical"
-    offer     = "0001-com-ubuntu-server-focal"
-    sku       = "20_04-lts"
-    version   = "latest".
-  }
-}
-```
-
-
-### Evidence
-#### terraform init
-![](./images/finalinit.png)
-#### terraform validate
-![](./images/finalvalidate.png)
-
-#### terraform plan
-![](./images/finalplan.png)
-
-#### terraform apply
-![](./images/finalapply.png)
-![](./images/ipPublica.png)
-After we execute ```terraform apply``` we are going to see an ip public that is the result of the definition we made in the file outputs.tf
-
-#### Portal Azure 
-We are able to see the virtual machine running on our azure account
-![](./images/finalazure.png)
-
-#### SSH 
-when we get our ip public we can introduce ```ssh adminuser@ippublic ``` in a console so we can access our VM in this case we got the public ip: ```172.173.219.167``` 
-![](./images/ssh1.png)
-![](./images/ssh2.png)
-
-
-we are able to enter the linux machine after entering the password.
-
-#### terraform destroy
-Finally if we want we can destory what we have built
-![](./images/finaldestroy.png)
+![](./images/portal_modules.png) 
