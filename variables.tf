@@ -31,13 +31,14 @@ variable securityrule {
   description = "security rule"
 }
 
-variable linuxm {
-  type        = string
-  description = "linux machine"
-}
-
 variable location {
   type        = string
   default     = "West Europe"
   description = "Location"
 }
+variable unique_id {
+  type        = set(string)
+  description = "id for machines"
+}
+
+

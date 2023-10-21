@@ -3,8 +3,8 @@ location = "East US"
 
 virtualnetwork = "virtual_network"
 subnet = "subnet"
-interface = "interface"
+inter = "interface"
 ip_name = "ip_name"
 securitygrp = "security_group"
 securityrule = "security_rule"
-linuxm = "linuxmachine"
+unique_id = ["machine1", "machine2"]

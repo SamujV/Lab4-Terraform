@@ -1,5 +1,5 @@
 output ip {
-  value       = azurerm_public_ip.ip.ip_address
+  value       = module.vm.ip_machines
   sensitive   = false
   description = "ip Public"
 }
